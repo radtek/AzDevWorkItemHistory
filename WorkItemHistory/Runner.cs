@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using CsvHelper;
+using CsvHelper.Configuration;
 using LanguageExt;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using static LanguageExt.Prelude;
@@ -35,11 +37,10 @@ namespace WorkItemHistory
             var executor = new WorkItemMiner(options.Username, options.PersonalAccessToken, options.GetAzureUri());
             var revisions = executor.GetAllWorkItemRevisionsForProjectAsync(options.Project);
 
-            await foreach (var x in revisions)
+            using (var csv = new CsvWriter(_stdout, leaveOpen: true))
             {
-                var item = MapWorkItemRevision(x);
-
-                _stdout.WriteLine($"{item.Id},{item.Title},{item.State},{item.ChangeDate},{item.AreaPath},{item.IterationPath},{item.Revision},{item.TeamProject},{item.WorkItemType}");
+                csv.Configuration.MemberTypes |= MemberTypes.Fields;
+                csv.WriteRecords(CollectWorkItems(revisions).Result.Select(MapWorkItemRevision));
             }
 
             return 0;
@@ -54,20 +55,19 @@ namespace WorkItemHistory
                 .GroupBy(x => x.Id)
                 .Select(ProcessWorkItem);
 
-            foreach (var item in workItems)
+            using (var csv = new CsvWriter(_stdout, leaveOpen: true))
             {
-                _stdout.WriteLine($"{item.Id},{item.Title},{item.State},{item.WorkItemType},{item.IterationPath},{item.AreaPath},{item.TeamProject},{DateTimeString(item.Start)},{DateTimeString(item.End)}");
+                csv.Configuration.RegisterClassMap<CsvMaps.WorkItemInfoMap>();
+                csv.WriteRecords(workItems);
+                _stderr.WriteLine($"Wrote {workItems.Count()} records.");
             }
 
             return 0;
 
-            string DateTimeString(Option<DateTime> item)
-            {
-                return item.Map(d => d.ToString()).IfNone(string.Empty);
-            }
+
         }
 
-        private static async Task<IEnumerable<WorkItem>> CollectWorkItems(IAsyncEnumerable<WorkItem> items)
+        private async Task<IEnumerable<WorkItem>> CollectWorkItems(IAsyncEnumerable<WorkItem> items)
         {
             var result = new List<WorkItem>();
 
@@ -81,14 +81,6 @@ namespace WorkItemHistory
 
         private static WorkItemRevisionInfo MapWorkItemRevision(WorkItem item)
         {
-            //System.Title
-            //System.WorkItemType
-            //System.IterationPath
-            //System.State
-            //System.AreaPath => JEDIv2
-            //System.TeamProject => JEDIv2
-            //System.ChangedDate
-
             return new WorkItemRevisionInfo(
                 title: item.Fields["System.Title"].ToString(),
                 workItemType: item.Fields["System.WorkItemType"].ToString(),
@@ -101,8 +93,7 @@ namespace WorkItemHistory
                 changeDate: DateTime.Parse(item.Fields["System.ChangedDate"].ToString()));
         }
 
-
-        private WorkItemInfo ProcessWorkItem(IEnumerable<WorkItemRevisionInfo> revisions)
+        private static WorkItemInfo ProcessWorkItem(IEnumerable<WorkItemRevisionInfo> revisions)
         {
             var listed = revisions.ToList();
             var last = listed.Last();
@@ -111,7 +102,7 @@ namespace WorkItemHistory
             return new WorkItemInfo(last.Title, last.WorkItemType, last.IterationPath, last.State, last.AreaPath, last.TeamProject, last.Id, start, end);
         }
 
-        private (Option<DateTime> start, Option<DateTime> end) GetWorkItemTimeRange(IEnumerable<WorkItemRevisionInfo> revisions)
+        private static (Option<DateTime> start, Option<DateTime> end) GetWorkItemTimeRange(IEnumerable<WorkItemRevisionInfo> revisions)
         {
             Option<DateTime> activeDate = None;
             Option<DateTime> endDate = None;
