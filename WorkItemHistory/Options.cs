@@ -16,11 +16,20 @@ namespace WorkItemHistory
         }
     }
 
-    [Verb("revisions", HelpText = "Fetches all work item revisions for a project.")]
-    public class RevisionsOptions : Options
+    public class ProjectOptions : Options
     {
         [Option(longName: "project", HelpText = "The project name to query revisions for.", SetName = QueryVsRevisionsSet)]
         public string Project { get; set; }
+    }
+
+    [Verb("revisions", HelpText = "Fetches all work item revisions for a project.")]
+    public class RevisionsOptions : ProjectOptions
+    {
+    }
+
+    [Verb("durations", HelpText = "Fetches timespans of all work items for a project.")]
+    public class DurationsOptions : ProjectOptions
+    {
     }
 
     public class Options

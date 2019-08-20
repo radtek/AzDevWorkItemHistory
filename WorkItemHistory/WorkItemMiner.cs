@@ -18,8 +18,7 @@ namespace WorkItemHistory
 
         public async Task<IEnumerable<WorkItemReference>> ExecuteQueryAsync(Guid queryId)
         {
-            var x = await _client.QueryByIdAsync(queryId);
-            return x.WorkItems;
+            return (await _client.QueryByIdAsync(queryId)).WorkItems;
         }
 
         public async IAsyncEnumerable<WorkItem> GetAllWorkItemRevisionsForProjectAsync(string projectName)
@@ -33,6 +32,5 @@ namespace WorkItemHistory
                 revisions = await _client.ReadReportingRevisionsGetAsync(projectName, continuationToken: revisions.ContinuationToken);
             }
         }
-
     }
 }
