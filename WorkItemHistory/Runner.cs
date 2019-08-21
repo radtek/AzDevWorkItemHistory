@@ -21,14 +21,17 @@ namespace WorkItemHistory
             _stdout = stdout;
             _stderr = stderr;
         }
+
         public async Task<int> RunQuery(QueryOptions options)
         {
             var executor = new WorkItemMiner(options.Username, options.PersonalAccessToken, options.GetAzureUri());
-            var items = await executor.ExecuteQueryAsync(options.GetQueryId());
-            foreach (var workItem in items)
-            {
-                _stdout.WriteLine(workItem.Id);
-            }
+            var items = executor.ExecuteQueryAsync(options.GetQueryId());
+            var workItems = CollectWorkItems(items).Result
+                .Select(MapWorkItemRevision)
+                .ToList();
+
+            WriteCsv(workItems, cfg => cfg.MemberTypes |= MemberTypes.Fields);
+
             return 0;
         }
 

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Linq;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using Microsoft.VisualStudio.Services.Common;
@@ -10,15 +10,24 @@ namespace WorkItemHistory
     public class WorkItemMiner
     {
         private readonly WorkItemTrackingHttpClient _client;
+        private const int AzureDevOpsWorkItemBatchSize = 200;
 
         public WorkItemMiner(string username, string pat, Uri azureUri)
         {
             _client = new WorkItemTrackingHttpClient(azureUri, new VssBasicCredential(username, pat));
         }
 
-        public async Task<IEnumerable<WorkItemReference>> ExecuteQueryAsync(Guid queryId)
+        public async IAsyncEnumerable<WorkItem> ExecuteQueryAsync(Guid queryId)
         {
-            return (await _client.QueryByIdAsync(queryId)).WorkItems;
+            var queryResult = await _client.QueryByIdAsync(queryId);
+
+            foreach (var batched in queryResult.WorkItems.Batch(AzureDevOpsWorkItemBatchSize))
+            {
+                var batchResult = await _client.GetWorkItemsBatchAsync(new WorkItemBatchGetRequest { Ids = batched.Select(i => i.Id) });
+
+                foreach (var item in batchResult)
+                    yield return item;
+            }
         }
 
         public async IAsyncEnumerable<WorkItem> GetAllWorkItemRevisionsForProjectAsync(string projectName)
