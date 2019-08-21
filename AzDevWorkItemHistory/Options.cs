@@ -8,7 +8,7 @@ namespace WorkItemHistory
     [Verb("query", HelpText = "Executes a query.")]
     public class QueryOptions : Options
     {
-        [Option(longName: "queryId", HelpText = "The GUID of the query.", Required = true, SetName = QueryVsRevisionsSet)]
+        [Option(longName: "queryId", HelpText = "The GUID of the query.", Required = true)]
         public string QueryId { get; set; }
 
         public Guid GetQueryId()
@@ -44,8 +44,6 @@ namespace WorkItemHistory
 
     public class Options
     {
-        protected const string QueryVsRevisionsSet = "QueryVsRevisionsSet";
-
         [Option(longName: "username", HelpText = "Azure DevOps username", Required = true)]
         public string Username { get; set; }
 
