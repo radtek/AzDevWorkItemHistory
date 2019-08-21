@@ -36,12 +36,13 @@ namespace WorkItemHistory
         {
             var executor = new WorkItemMiner(options.Username, options.PersonalAccessToken, options.GetAzureUri());
             var revisions = executor.GetAllWorkItemRevisionsForProjectAsync(options.Project);
+            var workItems = CollectWorkItems(revisions).Result
+                .Select(MapWorkItemRevision)
+                .Where(x => options.AreaPathOption.Map(ap => ap == x.AreaPath).IfNone(true))
+                .Where(x => options.IterationPathOption.Map(ap => ap == x.IterationPath).IfNone(true))
+                .ToList();
 
-            using (var csv = new CsvWriter(_stdout, leaveOpen: true))
-            {
-                csv.Configuration.MemberTypes |= MemberTypes.Fields;
-                csv.WriteRecords(CollectWorkItems(revisions).Result.Select(MapWorkItemRevision));
-            }
+            WriteCsv(workItems, cfg => cfg.MemberTypes |= MemberTypes.Fields);
 
             return 0;
         }
@@ -53,18 +54,24 @@ namespace WorkItemHistory
             var workItems = CollectWorkItems(revisions).Result
                 .Select(MapWorkItemRevision)
                 .GroupBy(x => x.Id)
-                .Select(ProcessWorkItem);
+                .Select(ProcessWorkItem)
+                .Where(x => options.AreaPathOption.Map(ap => ap == x.AreaPath).IfNone(true))
+                .Where(x => options.IterationPathOption.Map(ap => ap == x.IterationPath).IfNone(true))
+                .ToList();
 
-            using (var csv = new CsvWriter(_stdout, leaveOpen: true))
-            {
-                csv.Configuration.RegisterClassMap<CsvMaps.WorkItemInfoMap>();
-                csv.WriteRecords(workItems);
-                _stderr.WriteLine($"Wrote {workItems.Count()} records.");
-            }
+            WriteCsv(workItems, cfg => cfg.RegisterClassMap<CsvMaps.WorkItemInfoMap>());
 
             return 0;
+        }
 
+        private void WriteCsv<T>(ICollection<T> records, Action<IWriterConfiguration> config)
+        {
+            using var csv = new CsvWriter(_stdout, leaveOpen: true);
 
+            config(csv.Configuration);
+            csv.WriteRecords(records);
+
+            _stderr.WriteLine($"Saved {records.Count} items.");
         }
 
         private async Task<IEnumerable<WorkItem>> CollectWorkItems(IAsyncEnumerable<WorkItem> items)

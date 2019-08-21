@@ -1,12 +1,13 @@
 ﻿using System;
 using CommandLine;
+using LanguageExt;
+using static LanguageExt.Prelude;
 
 namespace WorkItemHistory
 {
     [Verb("query", HelpText = "Executes a query.")]
     public class QueryOptions : Options
     {
-
         [Option(longName: "queryId", HelpText = "The GUID of the query.", Required = true, SetName = QueryVsRevisionsSet)]
         public string QueryId { get; set; }
 
@@ -18,8 +19,17 @@ namespace WorkItemHistory
 
     public class ProjectOptions : Options
     {
-        [Option(longName: "project", HelpText = "The project name to query revisions for.", SetName = QueryVsRevisionsSet)]
+        [Option(longName: "project", HelpText = "The project name to query revisions for.", Required = true)]
         public string Project { get; set; }
+
+        [Option(longName: "areaPath", HelpText = "Filter work items by the specified area path.", Required = false)]
+        public string AreaPath { get; set; }
+
+        [Option(longName: "iterationPath", HelpText = "Filter work items by the specified iteration path.", Required = false)]
+        public string IterationPath { get; set; }
+
+        public Option<string> AreaPathOption => string.IsNullOrEmpty(AreaPath) ? None : Some(AreaPath);
+        public Option<string> IterationPathOption => string.IsNullOrEmpty(IterationPath) ? None : Some(IterationPath);
     }
 
     [Verb("revisions", HelpText = "Fetches all work item revisions for a project.")]
