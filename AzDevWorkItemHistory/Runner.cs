@@ -69,12 +69,13 @@ namespace WorkItemHistory
 
         private void WriteCsv<T>(ICollection<T> records, Action<IWriterConfiguration> config)
         {
-            using var csv = new CsvWriter(_stdout, leaveOpen: true);
+            using (var csv = new CsvWriter(_stdout, leaveOpen: true))
+            {
+                config(csv.Configuration);
+                csv.WriteRecords(records);
 
-            config(csv.Configuration);
-            csv.WriteRecords(records);
-
-            _stderr.WriteLine($"Saved {records.Count} items.");
+                _stderr.WriteLine($"Saved {records.Count} items.");
+            }
         }
 
         private async Task<IEnumerable<WorkItem>> CollectWorkItems(IAsyncEnumerable<WorkItem> items)
