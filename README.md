@@ -27,3 +27,25 @@ $ ./AzDevWorkItemHistory.exe --help                                             
 
   version      Display version information.
 ```
+
+### Examples
+
+Viewing the results of a query whose GUID is `QUERY-GUID`:
+
+```
+$ ./AzDevWorkItemHistory.exe query \
+--username="your_username@acme.org" \
+--pat="YOUR_SECRET_TOKEN_HERE" \
+--azureUri="https://contoso.visualstudio.com" \
+--queryId="QUERY-GUID"
+```
+
+**CSV** - Create a CSV containing all revisions of all work items in project `PHOENIX`:
+
+```
+$ ./AzDevWorkItemHistory.exe revisions \
+--username="your_username@acme.org" \
+--pat="YOUR_SECRET_TOKEN_HERE" \
+--azureUri="https://contoso.visualstudio.com" \
+--project="PHOENIX" > phoenix_revisions.csv
+```
