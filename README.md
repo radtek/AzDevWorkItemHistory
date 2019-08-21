@@ -12,6 +12,8 @@ Command Line tool for executing queries and inspecting history of Azure DevOps W
 `pat` - This is your **Personal Access Token**. More info here: https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops
 
 
+## Usage
+
 ```
 $ ./AzDevWorkItemHistory.exe --help                                                                                                                                          AzDevWorkItemHistory 1.0.0                                                                                                                                                   Copyright (C) 2019 AzDevWorkItemHistory
 
