@@ -13,7 +13,7 @@ namespace WorkItemHistory
             {
                 AutoMap(new Configuration {MemberTypes = MemberTypes.Fields});
                 Map(m => m.Start).Index(1).ConvertUsing(d => DateTimeString(d.Start));
-                Map(m => m.End).Index(0).ConvertUsing(d => DateTimeString(d.Start));
+                Map(m => m.End).Index(0).ConvertUsing(d => DateTimeString(d.End));
                 Map(m => m.WorkItemType).Index(2);
                 Map(m => m.Id).Index(3);
                 Map(m => m.Title).Index(4);
