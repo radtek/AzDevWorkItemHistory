@@ -45,10 +45,6 @@ namespace WorkItemHistory
     public class Options
     {
         protected const string QueryVsRevisionsSet = "QueryVsRevisionsSet";
-        //var username = "fullerjc@gmail.com";
-        //var pat = "knmspqj5q4q7buj4vpqu5u2momwmwbuhf2aabz4l6btjiqh3wqba";
-        // "https://newmill.visualstudio.com"
-        //"041fb898-5d65-439e-992a-273157a3d843"
 
         [Option(longName: "username", HelpText = "Azure DevOps username", Required = true)]
         public string Username { get; set; }
