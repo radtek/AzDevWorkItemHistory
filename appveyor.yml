@@ -1,9 +1,17 @@
 version: 1.0.{build}
 image: Visual Studio 2019 Preview
-configuration: Release
-platform: Any CPU
+
+before_build:
+- pwsh: dotnet --version
+
 build_script:
-- pwsh: dotnet build
+- pwsh: dotnet publish -r win-x64 -c Release
+
+artifacts:
+ - path: 'WorkItemHistory\AzDevWorkItemHistory\bin\Release\netcoreapp3.0\win-x64\publish'
+   name: AzDevWorkItemHistory
+   type: File
+
 notifications:
 - provider: Slack
   incoming_webhook: https://hooks.slack.com/services/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
