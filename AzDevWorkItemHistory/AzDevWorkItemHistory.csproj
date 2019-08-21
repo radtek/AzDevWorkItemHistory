@@ -25,4 +25,6 @@
     <Folder Include="Properties\" />
   </ItemGroup>
 
+  <ProjectExtensions><VisualStudio><UserProperties properties_4launchsettings_1json__JsonSchema="http://json.schemastore.org/nuget-project" /></VisualStudio></ProjectExtensions>
+
 </Project>
