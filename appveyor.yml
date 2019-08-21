@@ -1,7 +1,9 @@
 version: 1.0.{build}
 image: Visual Studio 2019 Preview
-build:
-  verbosity: minimal
+configuration: Release
+platform: Any CPU
+build_script:
+- pwsh: dotnet build
 notifications:
 - provider: Slack
   incoming_webhook: https://hooks.slack.com/services/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
