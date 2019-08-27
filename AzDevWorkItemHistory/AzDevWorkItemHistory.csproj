@@ -7,6 +7,13 @@
     <PublishTrimmed>true</PublishTrimmed>
     <PublishSingleFile>true</PublishSingleFile>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+
+    <Version>1.1.0</Version>
+    <FileVersion>$(Version)</FileVersion>
+    <Authors>Jon Fuller</Authors>
+    <Description>Queries Azure DevOps Work-Item Tracking to CSV</Description>
+    <Copyright>Copyright © 2019 SEP, Inc</Copyright>
+    <Title>A simple command line tool for getting data out of Azure DevOps.</Title>
   </PropertyGroup>
 
   <ItemGroup>
