@@ -32,14 +32,17 @@ namespace WorkItemHistory
 
         public async IAsyncEnumerable<WorkItem> GetAllWorkItemRevisionsForProjectAsync(string projectName)
         {
-            var revisions = await _client.ReadReportingRevisionsGetAsync(projectName);
-            while (!revisions.IsLastBatch)
+            string continuationToken = null;
+            ReportingWorkItemRevisionsBatch revisions;
+            do
             {
+                revisions = await _client.ReadReportingRevisionsGetAsync(projectName, continuationToken: continuationToken);
+                continuationToken = revisions.ContinuationToken;
+
                 foreach (var item in revisions.Values)
                     yield return item;
 
-                revisions = await _client.ReadReportingRevisionsGetAsync(projectName, continuationToken: revisions.ContinuationToken);
-            }
+            } while (!revisions.IsLastBatch);
         }
     }
 }
