@@ -36,6 +36,11 @@ namespace WorkItemHistory
     {
     }
 
+    [Verb("all", HelpText = "Fetches all work items for a project.")]
+    public class AllWorkItemsOptions : ProjectOptions
+    {
+    }
+
     [Verb("durations", HelpText = "Fetches timespans of all work items for a project.")]
     public class DurationsOptions : ProjectOptions
     {

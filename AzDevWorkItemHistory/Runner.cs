@@ -35,6 +35,21 @@ namespace WorkItemHistory
             return 0;
         }
 
+        public async Task<int> AllWorkItems(AllWorkItemsOptions options)
+        {
+            var executor = new WorkItemMiner(options.Username, options.PersonalAccessToken, options.GetAzureUri());
+            var revisions = executor.GetAllWorkItemRevisionsForProjectAsync(options.Project);
+            var workItems = CollectWorkItems(revisions).Result
+                .Select(MapWorkItemRevision)
+                .GroupBy(w => w.Id)
+                .Select(g => g.Last())
+                .Select(w => new {w.Id, w.WorkItemType, w.Title})
+                .ToList();
+
+            WriteCsv(workItems, cfg => cfg.MemberTypes |= MemberTypes.Fields);
+
+            return 0;
+        }
         public async Task<int> RunRevisions(RevisionsOptions options)
         {
             var hasAreaPathFilter = !options.AreaPath.Any();
