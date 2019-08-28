@@ -171,7 +171,7 @@ namespace WorkItemHistory
                 lastState = workItemVersion.State;
             }
 
-            return (start: activeDate, end: endDate);
+            return (start: activeDate.IsSome ? activeDate : endDate, end: endDate);
         }
     }
 }
