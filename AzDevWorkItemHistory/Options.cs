@@ -29,6 +29,12 @@ namespace WorkItemHistory
 
         [Option(longName: "iterationPath", HelpText = "Filter work items by the specified iteration path. (can specify multiple)", Required = false, Separator = ',')]
         public IEnumerable<string> IterationPath { get; set; }
+
+        [Option(longName: "state", HelpText = "Filter work items by the specified state. (can specify multiple)", Required = false, Separator = ',')]
+        public IEnumerable<string> State { get; set; }
+
+        [Option(longName: "type", HelpText = "Filter work items by the specified work item type. (can specify multiple)", Required = false, Separator = ',')]
+        public IEnumerable<string> Type { get; set; }
     }
 
     [Verb("revisions", HelpText = "Fetches all work item revisions for a project.")]

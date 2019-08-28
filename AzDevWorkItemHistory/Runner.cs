@@ -30,7 +30,7 @@ namespace WorkItemHistory
                 .Select(MapWorkItemRevision)
                 .ToList();
 
-            WriteCsv(workItems, cfg => cfg.MemberTypes |= MemberTypes.Fields);
+            WriteCsv(workItems);
 
             return 0;
         }
@@ -42,46 +42,39 @@ namespace WorkItemHistory
             var workItems = CollectWorkItems(revisions).Result
                 .Select(MapWorkItemRevision)
                 .GroupBy(w => w.Id)
-                .Select(g => g.Last())
+                .Select(g => g.OrderBy(x => x.ChangeDate).Last())
+                .Then(items => ApplyFilter(items, options))
                 .Select(w => new {w.Id, w.WorkItemType, w.Title})
                 .ToList();
 
-            WriteCsv(workItems, cfg => cfg.MemberTypes |= MemberTypes.Fields);
+            WriteCsv(workItems);
 
             return 0;
         }
+
         public async Task<int> RunRevisions(RevisionsOptions options)
         {
-            var hasAreaPathFilter = !options.AreaPath.Any();
-            var hasIterationPathFilter = !options.IterationPath.Any();
-
             var executor = new WorkItemMiner(options.Username, options.PersonalAccessToken, options.GetAzureUri());
             var revisions = executor.GetAllWorkItemRevisionsForProjectAsync(options.Project);
             var workItems = CollectWorkItems(revisions).Result
                 .Select(MapWorkItemRevision)
-                .Where(x => hasAreaPathFilter || options.AreaPath.Any(path => path == x.AreaPath))
-                .Where(x => hasIterationPathFilter || options.IterationPath.Any(path => path == x.IterationPath))
+                .Then(items => ApplyFilter(items, options))
                 .ToList();
 
-
-            WriteCsv(workItems, cfg => cfg.MemberTypes |= MemberTypes.Fields);
+            WriteCsv(workItems);
 
             return 0;
         }
 
         public async Task<int> WorkItemDurations(DurationsOptions options)
         {
-            var hasAreaPathFilter = !options.AreaPath.Any();
-            var hasIterationPathFilter = !options.IterationPath.Any();
-
             var executor = new WorkItemMiner(options.Username, options.PersonalAccessToken, options.GetAzureUri());
             var revisions = executor.GetAllWorkItemRevisionsForProjectAsync(options.Project);
             var workItems = CollectWorkItems(revisions).Result
                 .Select(MapWorkItemRevision)
                 .GroupBy(x => x.Id)
                 .Select(ProcessWorkItem)
-                .Where(x => hasAreaPathFilter || options.AreaPath.Any(path => path == x.AreaPath))
-                .Where(x => hasIterationPathFilter || options.IterationPath.Any(path => path == x.IterationPath))
+                .Then(items => ApplyFilter(items, options))
                 .ToList();
 
             WriteCsv(workItems, cfg => cfg.RegisterClassMap<CsvMaps.WorkItemInfoMap>());
@@ -89,8 +82,24 @@ namespace WorkItemHistory
             return 0;
         }
 
-        private void WriteCsv<T>(ICollection<T> records, Action<IWriterConfiguration> config)
+        private IEnumerable<TWorkItemInfo> ApplyFilter<TWorkItemInfo>(IEnumerable<TWorkItemInfo> workItems, ProjectOptions options) where TWorkItemInfo : IWorkItemInfo
         {
+            var hasAreaPathFilter = !options.AreaPath.Any();
+            var hasIterationPathFilter = !options.IterationPath.Any();
+            var hasStateFilter = !options.State.Any();
+            var hasTypeFilter = !options.Type.Any();
+
+            return workItems
+                .Where(x => hasAreaPathFilter || options.AreaPath.Any(path => path == x.AreaPath))
+                .Where(x => hasIterationPathFilter || options.IterationPath.Any(path => path == x.IterationPath))
+                .Where(x => hasStateFilter || options.State.Any(path => path == x.State))
+                .Where(x => hasTypeFilter || options.Type.Any(path => path == x.WorkItemType));
+        }
+
+        private void WriteCsv<T>(ICollection<T> records, Action<IWriterConfiguration> config = null)
+        {
+            config ??= _ => {};
+
             using (var csv = new CsvWriter(_stdout, leaveOpen: true))
             {
                 config(csv.Configuration);

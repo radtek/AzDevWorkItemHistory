@@ -3,17 +3,17 @@ using LanguageExt;
 
 namespace WorkItemHistory
 {
-    public class WorkItemRevisionInfo : Record<WorkItemRevisionInfo>
+    public class WorkItemRevisionInfo : Record<WorkItemRevisionInfo>, IWorkItemInfo
     {
-        public readonly string Title;
-        public readonly string WorkItemType;
-        public readonly string IterationPath;
-        public readonly string State;
-        public readonly string AreaPath;
-        public readonly string TeamProject;
-        public readonly int Id;
-        public readonly int Revision;
-        public readonly DateTime ChangeDate;
+        public string Title { get; }
+        public string WorkItemType { get; }
+        public string IterationPath { get; }
+        public string State { get; }
+        public string AreaPath { get; }
+        public string TeamProject { get; }
+        public int Id { get; }
+        public int Revision { get; }
+        public DateTime ChangeDate { get; }
 
         public WorkItemRevisionInfo(string title, string workItemType, string iterationPath, string state,
             string areaPath, string teamProject, int id, int revision, DateTime changeDate)
