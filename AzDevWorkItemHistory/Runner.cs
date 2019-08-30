@@ -84,16 +84,20 @@ namespace WorkItemHistory
 
         private IEnumerable<TWorkItemInfo> ApplyFilter<TWorkItemInfo>(IEnumerable<TWorkItemInfo> workItems, ProjectOptions options) where TWorkItemInfo : IWorkItemInfo
         {
-            var hasAreaPathFilter = !options.AreaPath.Any();
-            var hasIterationPathFilter = !options.IterationPath.Any();
-            var hasStateFilter = !options.State.Any();
-            var hasTypeFilter = !options.Type.Any();
-
             return workItems
-                .Where(x => hasAreaPathFilter || options.AreaPath.Any(path => path == x.AreaPath))
-                .Where(x => hasIterationPathFilter || options.IterationPath.Any(path => path == x.IterationPath))
-                .Where(x => hasStateFilter || options.State.Any(path => path == x.State))
-                .Where(x => hasTypeFilter || options.Type.Any(path => path == x.WorkItemType));
+                .Where(item => HasFilterOrMatches(item, x => x.IterationPath, x => x.IterationPath))
+                .Where(item => HasFilterOrMatches(item, x => x.AreaPath, x => x.AreaPath))
+                .Where(item => HasFilterOrMatches(item, x => x.State, x => x.State))
+                .Where(item => HasFilterOrMatches(item, x => x.Type, x => x.WorkItemType));
+
+            bool HasFilterOrMatches(TWorkItemInfo item, Func<ProjectOptions, IEnumerable<string>> specifiedFiltersSelector, Func<TWorkItemInfo, string> selector)
+            {
+                var specifiedFilters = specifiedFiltersSelector(options).ToList();
+                var hasFilter = !specifiedFilters.Any();
+                var target = selector(item);
+
+                return hasFilter || specifiedFilters.Any(x => x.Equals(target, StringComparison.CurrentCultureIgnoreCase));
+            }
         }
 
         private void WriteCsv<T>(ICollection<T> records, Action<IWriterConfiguration> config = null)
