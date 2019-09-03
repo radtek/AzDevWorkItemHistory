@@ -26,3 +26,4 @@ steps:
     command: 'publish'
     publishWebProjects: false
     arguments: '--runtime=win-x64'
+    zipAfterPublish: false
