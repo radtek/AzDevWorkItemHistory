@@ -1,7 +1,7 @@
 # AzDevWorkItemHistory
 Command Line tool for executing queries and inspecting history of Azure DevOps Work Item Tracking
 
-[![Build status](https://ci.appveyor.com/api/projects/status/8tkfs728t9s49rkv?svg=true)](https://ci.appveyor.com/project/jonfuller/azdevworkitemhistory)
+[![Build Status](https://dev.azure.com/jon-fuller/AzDevWorkItemHistory/_apis/build/status/sep.AzDevWorkItemHistory?branchName=master)](https://dev.azure.com/jon-fuller/AzDevWorkItemHistory/_build/latest?definitionId=1&branchName=master)
 
 ## Connecting to Azure DevOps
 
