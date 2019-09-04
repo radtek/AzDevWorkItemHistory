@@ -27,3 +27,20 @@ steps:
     publishWebProjects: false
     arguments: '--runtime=win-x64'
     zipAfterPublish: false
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+
+- task: GitHubRelease@0
+  inputs:
+    gitHubConnection: 'sep-github-grant'
+    repositoryName: '$(Build.Repository.Name)'
+    action: 'create'
+    target: '$(Build.SourceVersion)'
+    tagSource: 'auto'
+    tagPattern: 'v$(Build.BuildNumber)'
+    title: 'v$(Build.BuildNumber)'
+    releaseNotesFile: '$(System.DefaultWorkingDirectory)/**/CHANGELOG.md'
+    compareWith: 'lastFullRelease'
