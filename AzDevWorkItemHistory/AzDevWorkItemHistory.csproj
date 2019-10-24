@@ -4,16 +4,18 @@
     <OutputType>Exe</OutputType>
     <LangVersion>8.0</LangVersion>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-    <PublishTrimmed>true</PublishTrimmed>
-    <PublishSingleFile>true</PublishSingleFile>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
 
-    <Version>1.2.1</Version>
+    <PackageOutputPath>./nupkg</PackageOutputPath>
+    <PackageId>azure-boards-workitems</PackageId>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>$(PackageId)</ToolCommandName>
+
+    <Version>1.3.0</Version>
     <FileVersion>$(Version)</FileVersion>
     <Authors>Jon Fuller</Authors>
     <Description>Queries Azure DevOps Work-Item Tracking to CSV</Description>
     <Copyright>Copyright © 2019 SEP, Inc</Copyright>
-    <Title>A simple command line tool for getting data out of Azure DevOps.</Title>
+    <Title>A simple command line tool for getting work item data out of Azure DevOps.</Title>
   </PropertyGroup>
 
   <ItemGroup>
