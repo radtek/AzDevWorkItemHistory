@@ -25,7 +25,7 @@ steps:
   inputs:
     command: 'publish'
     publishWebProjects: false
-    arguments: '--runtime=win-x64 --output=$(Build.ArtifactStagingDirectory)'
+    arguments: '/p:PublishSingleFile=true /p:PublishTrimmed=true --runtime=win-x64 --output=$(Build.ArtifactStagingDirectory)'
     zipAfterPublish: false
 - task: PublishBuildArtifacts@1
   inputs:
