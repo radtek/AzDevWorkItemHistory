@@ -44,3 +44,13 @@ steps:
     title: 'v$(Build.BuildNumber)'
     releaseNotesFile: '$(System.DefaultWorkingDirectory)/**/CHANGELOG.md'
     compareWith: 'lastFullRelease'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'pack'
+- task: NuGetCommand@2
+  inputs:
+    command: 'push'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;'
+    nuGetFeedType: 'external'
+    publishFeedCredentials: 'NUGET-azure-boards-workitems'
