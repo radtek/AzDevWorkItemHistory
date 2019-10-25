@@ -48,8 +48,9 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'pack'
-- task: DotNetCoreCLI@2
+- task: NuGetCommand@2
   inputs:
     command: 'push'
-    nugetFeedType: 'external'
-    externalEndPoint: 'NUGET-azure-boards-workitems'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;'
+    nuGetFeedType: 'external'
+    publishFeedCredentials: 'NUGET-azure-boards-workitems'
