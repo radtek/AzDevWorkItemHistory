@@ -22,7 +22,7 @@ namespace WorkItemHistory
             _stderr = stderr;
         }
 
-        public async Task<int> RunQuery(QueryOptions options)
+        public async Task<ExitCode> RunQuery(QueryOptions options)
         {
             var executor = new WorkItemMiner(options.Username, options.PersonalAccessToken, options.GetAzureUri());
             var items = executor.ExecuteQueryAsync(options.GetQueryId());
@@ -32,10 +32,10 @@ namespace WorkItemHistory
 
             WriteCsv(workItems);
 
-            return 0;
+            return ExitCode.Success;
         }
 
-        public async Task<int> AllWorkItems(AllWorkItemsOptions options)
+        public async Task<ExitCode> AllWorkItems(AllWorkItemsOptions options)
         {
             var executor = new WorkItemMiner(options.Username, options.PersonalAccessToken, options.GetAzureUri());
             var revisions = executor.GetAllWorkItemRevisionsForProjectAsync(options.Project);
@@ -49,10 +49,10 @@ namespace WorkItemHistory
 
             WriteCsv(workItems);
 
-            return 0;
+            return ExitCode.Success;
         }
 
-        public async Task<int> RunRevisions(RevisionsOptions options)
+        public async Task<ExitCode> RunRevisions(RevisionsOptions options)
         {
             var executor = new WorkItemMiner(options.Username, options.PersonalAccessToken, options.GetAzureUri());
             var revisions = executor.GetAllWorkItemRevisionsForProjectAsync(options.Project);
@@ -63,10 +63,10 @@ namespace WorkItemHistory
 
             WriteCsv(workItems);
 
-            return 0;
+            return ExitCode.Success;
         }
 
-        public async Task<int> WorkItemDurations(DurationsOptions options)
+        public async Task<ExitCode> WorkItemDurations(DurationsOptions options)
         {
             var executor = new WorkItemMiner(options.Username, options.PersonalAccessToken, options.GetAzureUri());
             var revisions = executor.GetAllWorkItemRevisionsForProjectAsync(options.Project);
@@ -79,7 +79,7 @@ namespace WorkItemHistory
 
             WriteCsv(workItems, cfg => cfg.RegisterClassMap<CsvMaps.WorkItemInfoMap>());
 
-            return 0;
+            return ExitCode.Success;
         }
 
         private IEnumerable<TWorkItemInfo> ApplyFilter<TWorkItemInfo>(IEnumerable<TWorkItemInfo> workItems, ProjectOptions options) where TWorkItemInfo : IWorkItemInfo
