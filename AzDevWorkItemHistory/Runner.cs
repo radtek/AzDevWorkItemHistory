@@ -11,15 +11,42 @@ using static LanguageExt.Prelude;
 
 namespace WorkItemHistory
 {
+    public interface ICredentialStore
+    {
+
+    }
+    public class FileCredentialStore
+    {
+
+    }
+    public class CredentialManager
+    {
+        internal bool HasUri(string azureUri)
+        {
+            throw new NotImplementedException();
+        }
+    }
     public class Runner
     {
         private readonly TextWriter _stdout;
         private readonly TextWriter _stderr;
+        private readonly CredentialManager _credentials;
 
-        public Runner(TextWriter stdout, TextWriter stderr)
+        public Runner(TextWriter stdout, TextWriter stderr, CredentialManager credentials)
         {
             _stdout = stdout;
             _stderr = stderr;
+            _credentials = credentials;
+        }
+
+        public async Task<ExitCode> Login(LoginOptions options)
+        {
+            if (_credentials.HasUri(options.AzureUri))
+                return ExitCode.DuplicateUri(options.AzureUri);
+
+            // _credentials.Save(options.AzureUri, options.Username, options.PersonalAccessToken);
+
+            return ExitCode.Success;
         }
 
         public async Task<ExitCode> RunQuery(QueryOptions options)

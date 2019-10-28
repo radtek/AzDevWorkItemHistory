@@ -49,6 +49,19 @@ namespace WorkItemHistory
     {
     }
 
+    [Verb("login", HelpText = "Stores encrypted credentials for Azure.")]
+    public class LoginOptions
+    {
+        [Option(longName: "username", HelpText = "Azure DevOps username", Required = true)]
+        public string Username { get; set; }
+
+        [Option(longName: "pat", HelpText = "Personal Access Token (https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops#create-personal-access-tokens-to-authenticate-access)", Required = true)]
+        public string PersonalAccessToken { get; set; }
+
+        [Option(longName: "azureUri", HelpText = "The base URI of your Azure DevOps instance. (e.g. https://contoso.visualstudio.com)", Required = true)]
+        public string AzureUri { get; set; }
+    }
+
     public class Options
     {
         [Option(longName: "username", HelpText = "Azure DevOps username", Required = true)]
