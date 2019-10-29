@@ -5,7 +5,7 @@ using CommandLine;
 namespace WorkItemHistory
 {
     [Verb("query", HelpText = "Executes a query.")]
-    public class QueryOptions : Options
+    public class QueryOptions : ProjectOptions
     {
         [Option(longName: "queryId", HelpText = "The GUID of the query.", Required = true)]
         public string QueryId { get; set; }
@@ -16,7 +16,7 @@ namespace WorkItemHistory
         }
     }
 
-    public class ProjectOptions : Options
+    public class ProjectOptions
     {
         [Option(longName: "project", HelpText = "The project name to query revisions for.", Required = true)]
         public string Project { get; set; }
@@ -32,6 +32,9 @@ namespace WorkItemHistory
 
         [Option(longName: "type", HelpText = "Filter work items by the specified work item type. (can specify multiple)", Required = false, Separator = ',')]
         public IEnumerable<string> Type { get; set; }
+
+        [Option(longName: "azureUri", HelpText = "The base URI of your Azure DevOps instance. (e.g. https://contoso.visualstudio.com)", Required = true)]
+        public Uri AzureUri { get; set; }
     }
 
     [Verb("revisions", HelpText = "Fetches all work item revisions for a project.")]
@@ -60,22 +63,7 @@ namespace WorkItemHistory
 
         [Option(longName: "azureUri", HelpText = "The base URI of your Azure DevOps instance. (e.g. https://contoso.visualstudio.com)", Required = true)]
         public string AzureUri { get; set; }
-    }
 
-    public class Options
-    {
-        [Option(longName: "username", HelpText = "Azure DevOps username", Required = true)]
-        public string Username { get; set; }
-
-        [Option(longName: "pat", HelpText = "Personal Access Token (https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops#create-personal-access-tokens-to-authenticate-access)", Required = true)]
-        public string PersonalAccessToken { get; set; }
-
-        [Option(longName: "azureUri", HelpText = "The base URI of your Azure DevOps instance. (e.g. https://contoso.visualstudio.com)", Required = true)]
-        public string AzureUri { get; set; }
-
-        public Uri GetAzureUri()
-        {
-            return new Uri(AzureUri);
-        }
+        public Uri GetAzureUri() => new Uri(AzureUri);
     }
 }

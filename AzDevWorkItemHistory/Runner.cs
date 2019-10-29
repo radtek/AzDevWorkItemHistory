@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using AzDevWorkItemHistory.Credentials;
 using CsvHelper;
 using CsvHelper.Configuration;
 using LanguageExt;
@@ -11,47 +12,33 @@ using static LanguageExt.Prelude;
 
 namespace WorkItemHistory
 {
-    public interface ICredentialStore
-    {
-
-    }
-    public class FileCredentialStore
-    {
-
-    }
-    public class CredentialManager
-    {
-        internal bool HasUri(string azureUri)
-        {
-            throw new NotImplementedException();
-        }
-    }
     public class Runner
     {
         private readonly TextWriter _stdout;
         private readonly TextWriter _stderr;
-        private readonly CredentialManager _credentials;
+        private readonly CredentialManager _credentialManager;
 
-        public Runner(TextWriter stdout, TextWriter stderr, CredentialManager credentials)
+        public Runner(TextWriter stdout, TextWriter stderr, CredentialManager credentialManager)
         {
             _stdout = stdout;
             _stderr = stderr;
-            _credentials = credentials;
+            _credentialManager = credentialManager;
         }
 
         public async Task<ExitCode> Login(LoginOptions options)
         {
-            if (_credentials.HasUri(options.AzureUri))
-                return ExitCode.DuplicateUri(options.AzureUri);
+            if (_credentialManager.HasUri(options.GetAzureUri()))
+                return ExitCode.DuplicateUri(options.GetAzureUri());
 
-            // _credentials.Save(options.AzureUri, options.Username, options.PersonalAccessToken);
+            _credentialManager.Add(CredentialV1.CreateFromPlainText(options.GetAzureUri(), options.Username, options.PersonalAccessToken));
+            _credentialManager.Save();
 
             return ExitCode.Success;
         }
 
-        public async Task<ExitCode> RunQuery(QueryOptions options)
+        public async Task<ExitCode> RunQuery(QueryOptions options, CredentialV1 credentialV1)
         {
-            var executor = new WorkItemMiner(options.Username, options.PersonalAccessToken, options.GetAzureUri());
+            var executor = new WorkItemMiner(credentialV1.Username, credentialV1.GetPlainTextPersonalAccessToken(), options.AzureUri);
             var items = executor.ExecuteQueryAsync(options.GetQueryId());
             var workItems = CollectWorkItems(items).Result
                 .Select(MapWorkItemRevision)
@@ -62,9 +49,9 @@ namespace WorkItemHistory
             return ExitCode.Success;
         }
 
-        public async Task<ExitCode> AllWorkItems(AllWorkItemsOptions options)
+        public async Task<ExitCode> AllWorkItems(AllWorkItemsOptions options, CredentialV1 credentialV1)
         {
-            var executor = new WorkItemMiner(options.Username, options.PersonalAccessToken, options.GetAzureUri());
+            var executor = new WorkItemMiner(credentialV1.Username, credentialV1.GetPlainTextPersonalAccessToken(), options.AzureUri);
             var revisions = executor.GetAllWorkItemRevisionsForProjectAsync(options.Project);
             var workItems = CollectWorkItems(revisions).Result
                 .Select(MapWorkItemRevision)
@@ -79,9 +66,9 @@ namespace WorkItemHistory
             return ExitCode.Success;
         }
 
-        public async Task<ExitCode> RunRevisions(RevisionsOptions options)
+        public async Task<ExitCode> RunRevisions(RevisionsOptions options, CredentialV1 credentialV1)
         {
-            var executor = new WorkItemMiner(options.Username, options.PersonalAccessToken, options.GetAzureUri());
+            var executor = new WorkItemMiner(credentialV1.Username, credentialV1.GetPlainTextPersonalAccessToken(), options.AzureUri);
             var revisions = executor.GetAllWorkItemRevisionsForProjectAsync(options.Project);
             var workItems = CollectWorkItems(revisions).Result
                 .Select(MapWorkItemRevision)
@@ -93,9 +80,9 @@ namespace WorkItemHistory
             return ExitCode.Success;
         }
 
-        public async Task<ExitCode> WorkItemDurations(DurationsOptions options)
+        public async Task<ExitCode> WorkItemDurations(DurationsOptions options, CredentialV1 credentialV1)
         {
-            var executor = new WorkItemMiner(options.Username, options.PersonalAccessToken, options.GetAzureUri());
+            var executor = new WorkItemMiner(credentialV1.Username, credentialV1.PersonalAccessToken, options.AzureUri);
             var revisions = executor.GetAllWorkItemRevisionsForProjectAsync(options.Project);
             var workItems = CollectWorkItems(revisions).Result
                 .Select(MapWorkItemRevision)
