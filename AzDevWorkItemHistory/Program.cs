@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using AzDevWorkItemHistory.Credentials;
 using CommandLine;
@@ -12,16 +15,22 @@ namespace WorkItemHistory
         {
             var stdOut = Console.Out;
             var stdErr = Console.Error;
-            var credentialManager = new CredentialManager(new YamlFileCredentialStore("credentials.yml"));
+            var path = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                "azure-boards-workitems",
+                "credentials.yml");
+            var credentialManager = new CredentialManager(new YamlFileCredentialStore(path));
 
+            stdErr.WriteLine(path);
             var runner =
                 new CheckLoginStatusRunner(credentialManager,    // ensures the the user is logged in for this URI
                 new AuthorizedRunner(                            // try/catch for the actual operation, looks for unauthorized exception
                 new Runner(stdOut, stdErr, credentialManager))); // actually does the thing
 
-            var result = Parser.Default.ParseArguments<LoginOptions, QueryOptions, RevisionsOptions, DurationsOptions, AllWorkItemsOptions>(args)
+            var result = Parser.Default.ParseArguments<LoginOptions, LogoutOptions, QueryOptions, RevisionsOptions, DurationsOptions, AllWorkItemsOptions>(args)
                 .MapResult(
                     (LoginOptions opts) => runner.Login(opts),
+                    (LogoutOptions opts) => runner.Logout(opts),
                     (QueryOptions opts) => runner.RunQuery(opts),
                     (RevisionsOptions opts) => runner.RunRevisions(opts),
                     (AllWorkItemsOptions opts) => runner.AllWorkItems(opts),

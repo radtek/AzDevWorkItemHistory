@@ -52,6 +52,13 @@ namespace WorkItemHistory
     {
     }
 
+    [Verb("logout", HelpText = "Removes a set of credentials for the given URI.")]
+    public class LogoutOptions
+    {
+        [Option(longName: "azureUri", HelpText = "The base URI of your Azure DevOps instance. (e.g. https://contoso.visualstudio.com)", Required = true)]
+        public Uri AzureUri { get; set; }
+    }
+
     [Verb("login", HelpText = "Stores encrypted credentials for Azure.")]
     public class LoginOptions
     {
@@ -62,8 +69,6 @@ namespace WorkItemHistory
         public string PersonalAccessToken { get; set; }
 
         [Option(longName: "azureUri", HelpText = "The base URI of your Azure DevOps instance. (e.g. https://contoso.visualstudio.com)", Required = true)]
-        public string AzureUri { get; set; }
-
-        public Uri GetAzureUri() => new Uri(AzureUri);
+        public Uri AzureUri { get; set; }
     }
 }

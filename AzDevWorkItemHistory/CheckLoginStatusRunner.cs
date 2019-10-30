@@ -16,6 +16,7 @@ namespace WorkItemHistory
         }
 
         public Task<ExitCode> Login(LoginOptions opts) => _runner.Login(opts);
+        public Task<ExitCode> Logout(LogoutOptions opts) => _runner.Logout(opts);
         public Task<ExitCode> RunQuery(QueryOptions opts) => CheckLoginAndRun(opts, c => _runner.RunQuery(opts, c));
         public Task<ExitCode> RunRevisions(RevisionsOptions opts) => CheckLoginAndRun(opts, c => _runner.RunRevisions(opts, c));
         public Task<ExitCode> AllWorkItems(AllWorkItemsOptions opts) => CheckLoginAndRun(opts, c => _runner.AllWorkItems(opts, c));

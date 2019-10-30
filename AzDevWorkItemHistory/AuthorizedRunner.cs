@@ -14,6 +14,7 @@ namespace WorkItemHistory
         }
 
         public Task<ExitCode> Login(LoginOptions opts) => _runner.Login(opts);
+        public Task<ExitCode> Logout(LogoutOptions opts) => _runner.Logout(opts);
         public Task<ExitCode> RunQuery(QueryOptions opts, CredentialV1 cred) => TryIt(opts, () => _runner.RunQuery(opts, cred));
         public Task<ExitCode> RunRevisions(RevisionsOptions opts, CredentialV1 cred) => TryIt(opts, () => _runner.RunRevisions(opts, cred));
         public Task<ExitCode> AllWorkItems(AllWorkItemsOptions opts, CredentialV1 cred) => TryIt(opts, () => _runner.AllWorkItems(opts, cred));

@@ -25,15 +25,22 @@ namespace WorkItemHistory
             _credentialManager = credentialManager;
         }
 
-        public async Task<ExitCode> Login(LoginOptions options)
+        public Task<ExitCode> Login(LoginOptions options)
         {
-            if (_credentialManager.HasUri(options.GetAzureUri()))
-                return ExitCode.DuplicateUri(options.GetAzureUri());
+            if (_credentialManager.HasUri(options.AzureUri))
+                return Task.FromResult(ExitCode.DuplicateUri(options.AzureUri));
 
-            _credentialManager.Add(CredentialV1.CreateFromPlainText(options.GetAzureUri(), options.Username, options.PersonalAccessToken));
+            _credentialManager.Add(CredentialV1.CreateFromPlainText(options.AzureUri, options.Username, options.PersonalAccessToken));
             _credentialManager.Save();
 
-            return ExitCode.Success;
+            return Task.FromResult(ExitCode.Success);
+        }
+        public Task<ExitCode> Logout(LogoutOptions opts)
+        {
+            _credentialManager.Remove(opts.AzureUri);
+            _credentialManager.Save();
+
+            return Task.FromResult(ExitCode.Success);
         }
 
         public async Task<ExitCode> RunQuery(QueryOptions options, CredentialV1 credentialV1)
