@@ -11,17 +11,30 @@ Command Line tool for executing queries and inspecting history of Azure DevOps W
 
 `pat` - This is your **Personal Access Token**. More info here: https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops
 
+## Installation
+
+```
+dotnet tool install -g azure-boards-workitems
+```
 
 ## Usage
 
+
 ```
-$ ./AzDevWorkItemHistory.exe --help                                                                                                                                          AzDevWorkItemHistory 1.0.0                                                                                                                                                   Copyright (C) 2019 AzDevWorkItemHistory
+$ ./AzDevWorkItemHistory.exe --help                               AzDevWorkItemHistory 1.4.0
+Copyright c 2019 SEP, Inc
+
+  login        Stores encrypted credentials for Azure.
+
+  logout       Removes a set of credentials for the given URI.
 
   query        Executes a query.
 
-  revisions    Fetches all work item revisions for a project.
+  revisions    Fetches all work item revisions for a project (useful for data-mining and reporting).
 
   durations    Fetches timespans of all work items for a project.
+
+  all          Fetches all work items for a project.
 
   help         Display more information on a specific command.
 
@@ -30,22 +43,20 @@ $ ./AzDevWorkItemHistory.exe --help                                             
 
 ### Examples
 
+Login to your Azure DevOps instance:
+
+```
+$ azure-boards-workitems login --azureUri=https://contoso.visualstudio.com/ --pat=generated-personal-access-token --username=alice
+```
+
 Viewing the results of a query whose GUID is `QUERY-GUID`:
 
 ```
-$ ./AzDevWorkItemHistory.exe query \
---username="your_username@acme.org" \
---pat="YOUR_SECRET_TOKEN_HERE" \
---azureUri="https://contoso.visualstudio.com" \
---queryId="QUERY-GUID"
+azure-boards-workitems query --azureUri=https://contoso.visualstudio.com/ --queryId=this-is-a-query-guid
 ```
 
 **CSV** - Create a CSV containing all revisions of all work items in project `PHOENIX`:
 
 ```
-$ ./AzDevWorkItemHistory.exe revisions \
---username="your_username@acme.org" \
---pat="YOUR_SECRET_TOKEN_HERE" \
---azureUri="https://contoso.visualstudio.com" \
---project="PHOENIX" > phoenix_revisions.csv
+azure-boards-workitems all --azureUri=https://contoso.visualstudio.com/ --project=Phoenix > phoenix_revisions.csv
 ```
