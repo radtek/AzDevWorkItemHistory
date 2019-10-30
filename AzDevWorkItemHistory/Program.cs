@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using AzDevWorkItemHistory.Credentials;
 using CommandLine;
@@ -11,13 +9,14 @@ namespace WorkItemHistory
 {
     class Program
     {
+        public const string ApplicationExecutableName = "azure-boards-workitems";
         static async Task<int> Main(string[] args)
         {
             var stdOut = Console.Out;
             var stdErr = Console.Error;
             var path = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "azure-boards-workitems",
+                ApplicationExecutableName,
                 "credentials.yml");
             var credentialManager = new CredentialManager(new YamlFileCredentialStore(path));
 

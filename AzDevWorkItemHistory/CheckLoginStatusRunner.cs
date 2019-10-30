@@ -22,7 +22,7 @@ namespace WorkItemHistory
         public Task<ExitCode> AllWorkItems(AllWorkItemsOptions opts) => CheckLoginAndRun(opts, c => _runner.AllWorkItems(opts, c));
         public Task<ExitCode> WorkItemDurations(DurationsOptions opts) => CheckLoginAndRun(opts, c => _runner.WorkItemDurations(opts, c));
 
-        private Task<ExitCode> CheckLoginAndRun<TOpts>(TOpts opts, Func<CredentialV1, Task<ExitCode>> theCall) where TOpts : ProjectOptions
+        private Task<ExitCode> CheckLoginAndRun<TOpts>(TOpts opts, Func<CredentialV1, Task<ExitCode>> theCall) where TOpts : AzureOptions
         {
             return _credentialManager.Get(opts.AzureUri).Match(
                 Some: theCall,

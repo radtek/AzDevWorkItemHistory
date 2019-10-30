@@ -5,7 +5,7 @@ using CommandLine;
 namespace WorkItemHistory
 {
     [Verb("query", HelpText = "Executes a query.")]
-    public class QueryOptions : ProjectOptions
+    public partial class QueryOptions : AzureOptions
     {
         [Option(longName: "queryId", HelpText = "The GUID of the query.", Required = true)]
         public string QueryId { get; set; }
@@ -16,7 +16,37 @@ namespace WorkItemHistory
         }
     }
 
-    public class ProjectOptions
+    [Verb("revisions", HelpText = "Fetches all work item revisions for a project (useful for data-mining and reporting).")]
+    public partial class RevisionsOptions : ProjectOptions
+    {
+    }
+
+    [Verb("all", HelpText = "Fetches all work items for a project.")]
+    public partial class AllWorkItemsOptions : ProjectOptions
+    {
+    }
+
+    [Verb("durations", HelpText = "Fetches timespans of all work items for a project.")]
+    public partial class DurationsOptions : ProjectOptions
+    {
+    }
+
+    [Verb("logout", HelpText = "Removes a set of credentials for the given URI.")]
+    public partial class LogoutOptions : AzureOptions
+    {
+    }
+
+    [Verb("login", HelpText = "Stores encrypted credentials for Azure.")]
+    public partial class LoginOptions : AzureOptions
+    {
+        [Option(longName: "username", HelpText = "Azure DevOps username", Required = true)]
+        public string Username { get; set; }
+
+        [Option(longName: "pat", HelpText = "Personal Access Token (https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops#create-personal-access-tokens-to-authenticate-access)", Required = true)]
+        public string PersonalAccessToken { get; set; }
+    }
+
+    public partial class ProjectOptions : AzureOptions
     {
         [Option(longName: "project", HelpText = "The project name to query revisions for.", Required = true)]
         public string Project { get; set; }
@@ -32,43 +62,13 @@ namespace WorkItemHistory
 
         [Option(longName: "type", HelpText = "Filter work items by the specified work item type. (can specify multiple)", Required = false, Separator = ',')]
         public IEnumerable<string> Type { get; set; }
-
-        [Option(longName: "azureUri", HelpText = "The base URI of your Azure DevOps instance. (e.g. https://contoso.visualstudio.com)", Required = true)]
-        public Uri AzureUri { get; set; }
     }
 
-    [Verb("revisions", HelpText = "Fetches all work item revisions for a project.")]
-    public class RevisionsOptions : ProjectOptions
+    public class AzureOptions
     {
-    }
+        protected const string ExampleUri = "https://contoso.visualstudio.com";
 
-    [Verb("all", HelpText = "Fetches all work items for a project.")]
-    public class AllWorkItemsOptions : ProjectOptions
-    {
-    }
-
-    [Verb("durations", HelpText = "Fetches timespans of all work items for a project.")]
-    public class DurationsOptions : ProjectOptions
-    {
-    }
-
-    [Verb("logout", HelpText = "Removes a set of credentials for the given URI.")]
-    public class LogoutOptions
-    {
-        [Option(longName: "azureUri", HelpText = "The base URI of your Azure DevOps instance. (e.g. https://contoso.visualstudio.com)", Required = true)]
-        public Uri AzureUri { get; set; }
-    }
-
-    [Verb("login", HelpText = "Stores encrypted credentials for Azure.")]
-    public class LoginOptions
-    {
-        [Option(longName: "username", HelpText = "Azure DevOps username", Required = true)]
-        public string Username { get; set; }
-
-        [Option(longName: "pat", HelpText = "Personal Access Token (https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops#create-personal-access-tokens-to-authenticate-access)", Required = true)]
-        public string PersonalAccessToken { get; set; }
-
-        [Option(longName: "azureUri", HelpText = "The base URI of your Azure DevOps instance. (e.g. https://contoso.visualstudio.com)", Required = true)]
+        [Option(longName: "azureUri", HelpText = "The base URI of your Azure DevOps instance. (e.g. " + ExampleUri + ")", Required = true)]
         public Uri AzureUri { get; set; }
     }
 }

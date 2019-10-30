@@ -20,7 +20,7 @@ namespace WorkItemHistory
         public Task<ExitCode> AllWorkItems(AllWorkItemsOptions opts, CredentialV1 cred) => TryIt(opts, () => _runner.AllWorkItems(opts, cred));
         public Task<ExitCode> WorkItemDurations(DurationsOptions opts, CredentialV1 cred) => TryIt(opts, () => _runner.WorkItemDurations(opts, cred));
 
-        private async Task<ExitCode> TryIt<TOpts>(TOpts opts, Func<Task<ExitCode>> theCall) where TOpts : ProjectOptions
+        private async Task<ExitCode> TryIt<TOpts>(TOpts opts, Func<Task<ExitCode>> theCall) where TOpts : AzureOptions
         {
             try
             {
