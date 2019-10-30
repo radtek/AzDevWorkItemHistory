@@ -41,6 +41,7 @@ namespace WorkItemHistory
             stdErr.WriteLine($"{exitCode.Value} - {exitCode.Message}");
             return exitCode.Value;
         }
+
         static Task<ExitCode> Err(IEnumerable<Error> parseErrors)
         {
             return Task.FromResult(ExitCode.GeneralError);

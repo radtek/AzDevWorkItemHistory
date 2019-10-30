@@ -16,6 +16,10 @@ namespace AzDevWorkItemHistory.Credentials
 
         public void Store(CredentialsV1 credentialsV1)
         {
+            var directory = Path.GetDirectoryName(_location);
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+
             var serializer = new SerializerBuilder()
                .WithNamingConvention(CamelCaseNamingConvention.Instance)
                .Build();
@@ -25,6 +29,9 @@ namespace AzDevWorkItemHistory.Credentials
 
         public CredentialsV1 Load()
         {
+            if (!Directory.Exists(Path.GetDirectoryName(_location)))
+                return new CredentialsV1();
+
             if (!File.Exists(_location))
                 return new CredentialsV1();
 
