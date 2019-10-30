@@ -20,7 +20,6 @@ namespace WorkItemHistory
                 "credentials.yml");
             var credentialManager = new CredentialManager(new YamlFileCredentialStore(path));
 
-            stdErr.WriteLine(path);
             var runner =
                 new CheckLoginStatusRunner(credentialManager,    // ensures the the user is logged in for this URI
                 new AuthorizedRunner(                            // try/catch for the actual operation, looks for unauthorized exception
