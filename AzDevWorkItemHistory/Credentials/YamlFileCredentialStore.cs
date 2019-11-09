@@ -7,16 +7,18 @@ namespace AzDevWorkItemHistory.Credentials
 {
     public class YamlFileCredentialStore : ICredentialStore
     {
-        private readonly string _location;
+        private readonly string _fullPath;
 
         public YamlFileCredentialStore(string location)
         {
-            _location = location;
+            _fullPath = location;
+            if (!Path.IsPathFullyQualified(location))
+                _fullPath = Path.GetFullPath(_fullPath);
         }
 
         public void Store(CredentialsV1 credentialsV1)
         {
-            var directory = Path.GetDirectoryName(_location);
+            var directory = Path.GetDirectoryName(_fullPath);
             if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
 
@@ -24,22 +26,22 @@ namespace AzDevWorkItemHistory.Credentials
                .WithNamingConvention(CamelCaseNamingConvention.Instance)
                .Build();
 
-            File.WriteAllText(_location, serializer.Serialize(credentialsV1), Encoding.UTF8);
+            File.WriteAllText(_fullPath, serializer.Serialize(credentialsV1), Encoding.UTF8);
         }
 
         public CredentialsV1 Load()
         {
-            if (!Directory.Exists(Path.GetDirectoryName(_location)))
+            if (!Directory.Exists(Path.GetDirectoryName(_fullPath)))
                 return new CredentialsV1();
 
-            if (!File.Exists(_location))
+            if (!File.Exists(_fullPath))
                 return new CredentialsV1();
 
             var deserializer = new DeserializerBuilder()
                .WithNamingConvention(CamelCaseNamingConvention.Instance)
                .Build();
 
-            return deserializer.Deserialize<CredentialsV1>(File.ReadAllText(_location, Encoding.UTF8));
+            return deserializer.Deserialize<CredentialsV1>(File.ReadAllText(_fullPath, Encoding.UTF8));
         }
     }
 }
