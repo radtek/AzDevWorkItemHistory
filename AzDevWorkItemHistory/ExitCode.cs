@@ -6,7 +6,7 @@ namespace WorkItemHistory
     public class ExitCode
     {
         public static ExitCode Success = new ExitCode(0, "Success");
-        public static ExitCode GeneralError = new ExitCode(-1, "unspecified error");
+        public static ExitCode ParseError = new ExitCode(5, "Error parsing program arguments.");
         public static ExitCode GeneralException(Exception e) => new ExitCode(-1, e.ToString());
         public static ExitCode DuplicateUri(Uri uri) => new ExitCode(2, $"This URI ({uri}) already exists. You need to 'logout' with that URI if you wish to update the credentials for that URI.");
         public static ExitCode NeedToLogin(Uri uri) => new ExitCode(3, $"You'll need to login to {uri} first to perform this operation.");

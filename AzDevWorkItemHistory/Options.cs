@@ -8,6 +8,7 @@ namespace WorkItemHistory
     public partial class QueryOptions : AzureOptions
     {
         [Option(longName: "queryId", HelpText = "The GUID of the query.", Required = true)]
+        [NoAnalytics]
         public string QueryId { get; set; }
 
         public Guid GetQueryId()
@@ -40,9 +41,11 @@ namespace WorkItemHistory
     public partial class LoginOptions : AzureOptions
     {
         [Option(longName: "username", HelpText = "Azure DevOps username", Required = true)]
+        [NoAnalytics]
         public string Username { get; set; }
 
         [Option(longName: "pat", HelpText = "Personal Access Token (https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops#create-personal-access-tokens-to-authenticate-access)", Required = true)]
+        [NoAnalytics]
         public string PersonalAccessToken { get; set; }
     }
 
@@ -69,6 +72,7 @@ namespace WorkItemHistory
         protected const string ExampleUri = "https://contoso.visualstudio.com";
 
         [Option(longName: "azureUri", HelpText = "The base URI of your Azure DevOps instance. (e.g. " + ExampleUri + ")", Required = true)]
+        [NoAnalytics]
         public Uri AzureUri { get; set; }
     }
 }
