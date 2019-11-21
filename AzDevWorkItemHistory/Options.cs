@@ -8,7 +8,6 @@ namespace WorkItemHistory
     public partial class QueryOptions : AzureOptions
     {
         [Option(longName: "queryId", HelpText = "The GUID of the query.", Required = true)]
-        [NoAnalytics]
         public string QueryId { get; set; }
 
         public Guid GetQueryId()

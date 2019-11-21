@@ -5,8 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using AzDevWorkItemHistory.Credentials;
 using CommandLine;
-using LanguageExt;
 using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.Channel;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace WorkItemHistory
@@ -15,17 +15,23 @@ namespace WorkItemHistory
     {
         public const string ApplicationExecutableName = "azure-boards-workitems";
         public const string InstrumentationKey = "1261066e-1707-4607-a992-80cdd2f4140f";
+
         static async Task<int> Main(string[] args)
         {
-            var services = new ServiceCollection();
-            services.AddApplicationInsightsTelemetryWorkerService(InstrumentationKey);
+            var services = new ServiceCollection()
+               .AddSingleton<ITelemetryChannel>(new InMemoryChannel())
+               .AddApplicationInsightsTelemetryWorkerService(opts =>
+                {
+                    opts.InstrumentationKey = InstrumentationKey;
+                    opts.ApplicationVersion = typeof(Program).Assembly.GetName().Version.ToString();
+                })
+               .BuildServiceProvider();
 
-            var serviceProvider = services.BuildServiceProvider();
-            var telemetry = serviceProvider.GetRequiredService<TelemetryClient>();
+            var telemetry = services.GetRequiredService<TelemetryClient>();
+            telemetry.Context.Device.OperatingSystem = Environment.OSVersion.ToString();
 
             try
             {
-
                 var stdOut = Console.Out;
                 var stdErr = Console.Error;
                 var path = Path.Combine(
@@ -52,7 +58,6 @@ namespace WorkItemHistory
                 var exitCode = await result;
                 stdErr.WriteLine($"{exitCode.Value} - {exitCode.Message}");
                 telemetry.Flush();
-                Task.Delay(TimeSpan.FromSeconds(3)).Wait();
                 return exitCode.Value;
 
             }
