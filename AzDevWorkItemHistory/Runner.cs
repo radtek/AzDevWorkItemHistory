@@ -89,7 +89,7 @@ namespace WorkItemHistory
 
         public async Task<ExitCode> WorkItemDurations(DurationsOptions options, CredentialV1 credentialV1)
         {
-            var executor = new WorkItemMiner(credentialV1.Username, credentialV1.PersonalAccessToken, options.AzureUri);
+            var executor = new WorkItemMiner(credentialV1.Username, credentialV1.GetPlainTextPersonalAccessToken(), options.AzureUri);
             var revisions = executor.GetAllWorkItemRevisionsForProjectAsync(options.Project);
             var workItems = CollectWorkItems(revisions).Result
                 .Select(MapWorkItemRevision)
