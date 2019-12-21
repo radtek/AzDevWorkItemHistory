@@ -7,7 +7,10 @@ using AzDevWorkItemHistory.Credentials;
 using CommandLine;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Channel;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.DependencyInjection;
+using System.Text;
+using System.Security.Cryptography;
 
 namespace WorkItemHistory
 {
@@ -18,17 +21,8 @@ namespace WorkItemHistory
 
         static async Task<int> Main(string[] args)
         {
-            var services = new ServiceCollection()
-               .AddSingleton<ITelemetryChannel>(new InMemoryChannel())
-               .AddApplicationInsightsTelemetryWorkerService(opts =>
-                {
-                    opts.InstrumentationKey = InstrumentationKey;
-                    opts.ApplicationVersion = typeof(Program).Assembly.GetName().Version.ToString();
-                })
-               .BuildServiceProvider();
-
-            var telemetry = services.GetRequiredService<TelemetryClient>();
-            telemetry.Context.Device.OperatingSystem = Environment.OSVersion.ToString();
+            var serviceProvider = ConfigureContainer();
+            var telemetry = serviceProvider.GetRequiredService<TelemetryClient>();
 
             try
             {
@@ -83,6 +77,46 @@ namespace WorkItemHistory
                 return errorData
                     .Concat(new[] { (key: "NumErrors", value: parseErrors.Count().ToString()) })
                     .ToDictionary(x => x.key, x => x.value);
+            }
+        }
+
+        private static IServiceProvider ConfigureContainer()
+        {
+            return new ServiceCollection()
+               .AddSingleton<ITelemetryChannel>(new InMemoryChannel())
+               .AddApplicationInsightsTelemetryWorkerService(opts =>
+                {
+                    opts.InstrumentationKey = InstrumentationKey;
+                    opts.ApplicationVersion = typeof(Program).Assembly.GetName().Version.ToString();
+                })
+                .AddSingleton(typeof(ITelemetryInitializer), TelemetryInitializer.Create(x => {
+                    x.Context.User.Id = GetUserId();
+                    x.Context.Device.OperatingSystem = Environment.OSVersion.ToString();
+                }))
+               .BuildServiceProvider();
+        }
+
+        private static string GetUserId()
+        {
+            return Hash($"{Environment.UserDomainName}-{Environment.UserName}");
+
+            static string Hash(string input)
+            {
+                using var sha = new SHA1Managed();
+                var hashed = sha.ComputeHash(Encoding.UTF8.GetBytes(input));
+                return HashToString(hashed);
+            }
+
+            static string HashToString(byte[] input)
+            {
+                var sb = new StringBuilder(input.Length * 2);
+
+                foreach (byte b in input)
+                {
+                    sb.Append(b.ToString("X2"));
+                }
+
+                return sb.ToString();
             }
         }
     }
