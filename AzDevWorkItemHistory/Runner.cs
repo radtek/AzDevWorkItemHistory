@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -131,7 +132,7 @@ namespace WorkItemHistory
 
             void WriteRecords(IEnumerable<string> header, IEnumerable<IEnumerable<object>> values)
             {
-                using var csv = new CsvWriter(_stdout, leaveOpen: true);
+                using var csv = new CsvWriter(_stdout, leaveOpen: true, cultureInfo: CultureInfo.CurrentUICulture);
                 csv.Configuration.TypeConverterCache.AddConverter<IdentityRef>(new IdentityRefConverter());
 
                 WriteRecord(header, csv);
@@ -154,7 +155,7 @@ namespace WorkItemHistory
         {
             config ??= _ => {};
 
-            using (var csv = new CsvWriter(_stdout, leaveOpen: true))
+            using (var csv = new CsvWriter(_stdout, leaveOpen: true, cultureInfo: CultureInfo.CurrentUICulture))
             {
                 config(csv.Configuration);
                 csv.WriteRecords(records);

@@ -11,16 +11,17 @@ namespace WorkItemHistory
         {
             public WorkItemInfoMap()
             {
-                AutoMap(new Configuration {MemberTypes = MemberTypes.Fields});
+                AutoMap(new CsvConfiguration(CultureInfo.CurrentUICulture) {MemberTypes = MemberTypes.Fields});
                 Map(m => m.Start).Index(1).ConvertUsing(d => DateTimeString(d.Start));
                 Map(m => m.End).Index(0).ConvertUsing(d => DateTimeString(d.End));
                 Map(m => m.WorkItemType).Index(2);
                 Map(m => m.Id).Index(3);
                 Map(m => m.Title).Index(4);
             }
-            string DateTimeString(Option<DateTime> item)
+
+            static string DateTimeString(Option<DateTime> item)
             {
-                return item.Map(d => d.ToString(CultureInfo.CurrentCulture)).IfNone(string.Empty);
+                return item.Map(d => d.ToString(CultureInfo.CurrentUICulture)).IfNone(string.Empty);
             }
         }
     }
