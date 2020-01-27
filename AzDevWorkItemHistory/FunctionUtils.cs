@@ -8,5 +8,9 @@ namespace WorkItemHistory
         {
             return f(x);
         }
+        public static void Then<T1>(this T1 x, Action<T1> f)
+        {
+            f(x);
+        }
     }
 }

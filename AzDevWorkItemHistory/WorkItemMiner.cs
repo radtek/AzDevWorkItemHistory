@@ -17,16 +17,26 @@ namespace WorkItemHistory
             _client = new WorkItemTrackingHttpClient(azureUri, new VssBasicCredential(username, pat));
         }
 
-        public async IAsyncEnumerable<WorkItem> ExecuteQueryAsync(Guid queryId)
+        public async IAsyncEnumerable<IDictionary<string, object>> ExecuteQueryAsync(Guid queryId)
         {
             var queryResult = await _client.QueryByIdAsync(queryId);
 
             foreach (var batched in queryResult.WorkItems.Batch(AzureDevOpsWorkItemBatchSize))
             {
-                var batchResult = await _client.GetWorkItemsBatchAsync(new WorkItemBatchGetRequest { Ids = batched.Select(i => i.Id) });
+                var batchResult = await _client.GetWorkItemsBatchAsync(new WorkItemBatchGetRequest
+                {
+                    Ids = batched.Select(i => i.Id),
+                    Fields = queryResult.Columns.Select(c => c.ReferenceName)
+                });
 
                 foreach (var item in batchResult)
-                    yield return item;
+                {
+                    yield return queryResult.Columns.ToDictionary(
+                        fieldRef => fieldRef.Name,
+                        fieldRef => item.Fields.ContainsKey(fieldRef.ReferenceName)
+                            ? item.Fields[fieldRef.ReferenceName]
+                            : "");
+                }
             }
         }
 

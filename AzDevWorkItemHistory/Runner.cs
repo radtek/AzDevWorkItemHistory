@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 using AzDevWorkItemHistory.Credentials;
 using CsvHelper;
 using CsvHelper.Configuration;
+using CsvHelper.TypeConversion;
 using LanguageExt;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
+using Microsoft.VisualStudio.Services.WebApi;
 using static LanguageExt.Prelude;
 
 namespace WorkItemHistory
@@ -47,11 +49,10 @@ namespace WorkItemHistory
         {
             var executor = new WorkItemMiner(credentialV1.Username, credentialV1.GetPlainTextPersonalAccessToken(), options.AzureUri);
             var items = executor.ExecuteQueryAsync(options.GetQueryId());
-            var workItems = CollectWorkItems(items).Result
-                .Select(MapWorkItemRevision)
-                .ToList();
 
-            WriteCsv(workItems);
+            CollectWorkItems(items).Result
+                .ToList()
+                .Then(WriteQueryResultCsv);
 
             return ExitCode.Success;
         }
@@ -121,6 +122,34 @@ namespace WorkItemHistory
             }
         }
 
+        private void WriteQueryResultCsv(ICollection<IDictionary<string, object>> records)
+        {
+            if (records.Count != 0)
+                WriteRecords(records.First().Keys, records.Select(r => r.Values));
+
+            _stderr.WriteLine($"Saved {records.Count} items.");
+
+            void WriteRecords(IEnumerable<string> header, IEnumerable<IEnumerable<object>> values)
+            {
+                using var csv = new CsvWriter(_stdout, leaveOpen: true);
+                csv.Configuration.TypeConverterCache.AddConverter<IdentityRef>(new IdentityRefConverter());
+
+                WriteRecord(header, csv);
+                foreach (var record in values)
+                {
+                    WriteRecord(record, csv);
+                }
+            }
+
+            static void WriteRecord(IEnumerable<object> record, IWriter csv)
+            {
+                foreach (var field in record)
+                {
+                    csv.WriteField(field);
+                }
+                csv.NextRecord();
+            }
+        }
         private void WriteCsv<T>(ICollection<T> records, Action<IWriterConfiguration> config = null)
         {
             config ??= _ => {};
@@ -134,13 +163,13 @@ namespace WorkItemHistory
             }
         }
 
-        private static async Task<IEnumerable<WorkItem>> CollectWorkItems(IAsyncEnumerable<WorkItem> items)
+        private static async Task<IEnumerable<T>> CollectWorkItems<T>(IAsyncEnumerable<T> items)
         {
-            var result = new List<WorkItem>();
+            var result = new List<T>();
 
-            await foreach (var workItem in items)
+            await foreach (var item in items)
             {
-                result.Add(workItem);
+                result.Add(item);
             }
 
             return result;
@@ -197,6 +226,19 @@ namespace WorkItemHistory
             }
 
             return (start: activeDate.IsSome ? activeDate : endDate, end: endDate);
+        }
+
+        private class IdentityRefConverter : ITypeConverter
+        {
+            public string ConvertToString(object value, IWriterRow row, MemberMapData memberMapData)
+            {
+                return ((IdentityRef) value).DisplayName;
+            }
+
+            public object ConvertFromString(string text, IReaderRow row, MemberMapData memberMapData)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }
