@@ -1,6 +1,7 @@
 using System;
 using System.Security.Cryptography;
 using System.Text;
+using Integrative.Encryption;
 
 namespace AzDevWorkItemHistory.Credentials
 {
@@ -11,7 +12,7 @@ namespace AzDevWorkItemHistory.Credentials
         public static string EncryptString(string value)
         {
             var decryptedByteArray = Encoding.UTF8.GetBytes(value);
-            var encryptedByteArray = ProtectedData.Protect(decryptedByteArray, EntropyBytes, DataProtectionScope.CurrentUser);
+            var encryptedByteArray = CrossProtect.Protect(decryptedByteArray, EntropyBytes, DataProtectionScope.CurrentUser);
             var encryptedString = Convert.ToBase64String(encryptedByteArray);
             return encryptedString;
         }
@@ -19,7 +20,7 @@ namespace AzDevWorkItemHistory.Credentials
         public static string DecryptString(string encryptedString)
         {
             var encryptedByteArray = Convert.FromBase64String(encryptedString);
-            var decryptedByteArray = ProtectedData.Unprotect(encryptedByteArray, EntropyBytes, DataProtectionScope.CurrentUser);
+            var decryptedByteArray = CrossProtect.Unprotect(encryptedByteArray, EntropyBytes, DataProtectionScope.CurrentUser);
             return Encoding.UTF8.GetString(decryptedByteArray);
         }
     }
