@@ -185,7 +185,8 @@ namespace WorkItemHistory
             var state = item.Fields["System.State"].ToString();
 
             var states = workItemStates.Single(t => t.workItemType.Name == workItemType).states;
-            var stateCategory = states.SingleOrDefault(s => s.Name == state)?.Category ?? $"category not found for {state}";
+            var stateCategory = states.SingleOrDefault(s => s.Name == state)?.Category.Then(StateCategory.FromString)
+             ?? StateCategory.Unknown(state);
 
             return new WorkItemRevisionInfo(
                 title: item.Fields["System.Title"].ToString(),
