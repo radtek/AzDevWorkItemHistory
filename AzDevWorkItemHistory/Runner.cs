@@ -215,26 +215,21 @@ namespace WorkItemHistory
             Option<DateTime> activeDate = None;
             Option<DateTime> endDate = None;
 
-            var lastState = string.Empty;
+            var lastState = StateCategory.Proposed;
 
             foreach (var workItemVersion in revisions)
             {
-                if ((lastState.Equals("New", StringComparison.OrdinalIgnoreCase) ||
-                    lastState.Equals("Ready", StringComparison.OrdinalIgnoreCase) ||
-                    lastState.Equals("UI Design", StringComparison.OrdinalIgnoreCase))
-                    &&
-                    workItemVersion.State.Equals("Active", StringComparison.OrdinalIgnoreCase))
+                if (lastState == StateCategory.Proposed && workItemVersion.StateCategory == StateCategory.InProgress)
                 {
                     activeDate = Some(workItemVersion.ChangeDate);
                 }
 
-                if (!lastState.Equals("Closed", StringComparison.OrdinalIgnoreCase) &&
-                    workItemVersion.State.Equals("Closed", StringComparison.OrdinalIgnoreCase))
+                if (lastState != StateCategory.Completed && workItemVersion.StateCategory == StateCategory.Completed)
                 {
                     endDate = Some(workItemVersion.ChangeDate);
                 }
 
-                lastState = workItemVersion.State;
+                lastState = workItemVersion.StateCategory;
             }
 
             return (start: activeDate.IsSome ? activeDate : endDate, end: endDate);
