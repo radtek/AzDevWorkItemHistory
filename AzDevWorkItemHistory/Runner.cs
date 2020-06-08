@@ -61,9 +61,10 @@ namespace WorkItemHistory
         public async Task<ExitCode> AllWorkItems(AllWorkItemsOptions options, CredentialV1 credentialV1)
         {
             var executor = new WorkItemMiner(credentialV1.Username, credentialV1.GetPlainTextPersonalAccessToken(), options.AzureUri);
+            var states = await executor.GetWorkItemTypeStates(options.Project);
             var revisions = executor.GetAllWorkItemRevisionsForProjectAsync(options.Project);
             var workItems = CollectWorkItems(revisions).Result
-                .Select(MapWorkItemRevision)
+                .Select(w => MapWorkItemRevision(w, states))
                 .GroupBy(w => w.Id)
                 .Select(g => g.OrderBy(x => x.ChangeDate).Last())
                 .Then(items => ApplyFilter(items, options))
@@ -78,9 +79,10 @@ namespace WorkItemHistory
         public async Task<ExitCode> RunRevisions(RevisionsOptions options, CredentialV1 credentialV1)
         {
             var executor = new WorkItemMiner(credentialV1.Username, credentialV1.GetPlainTextPersonalAccessToken(), options.AzureUri);
+            var states = await executor.GetWorkItemTypeStates(options.Project);
             var revisions = executor.GetAllWorkItemRevisionsForProjectAsync(options.Project);
             var workItems = CollectWorkItems(revisions).Result
-                .Select(MapWorkItemRevision)
+                .Select(w => MapWorkItemRevision(w, states))
                 .Then(items => ApplyFilter(items, options))
                 .ToList();
 
@@ -92,9 +94,10 @@ namespace WorkItemHistory
         public async Task<ExitCode> WorkItemDurations(DurationsOptions options, CredentialV1 credentialV1)
         {
             var executor = new WorkItemMiner(credentialV1.Username, credentialV1.GetPlainTextPersonalAccessToken(), options.AzureUri);
+            var states = await executor.GetWorkItemTypeStates(options.Project);
             var revisions = executor.GetAllWorkItemRevisionsForProjectAsync(options.Project);
             var workItems = CollectWorkItems(revisions).Result
-                .Select(MapWorkItemRevision)
+                .Select(w => MapWorkItemRevision(w, states))
                 .GroupBy(x => x.Id)
                 .Select(ProcessWorkItem)
                 .Then(items => ApplyFilter(items, options))
@@ -176,13 +179,20 @@ namespace WorkItemHistory
             return result;
         }
 
-        private static WorkItemRevisionInfo MapWorkItemRevision(WorkItem item)
+        private static WorkItemRevisionInfo MapWorkItemRevision(WorkItem item, IEnumerable<(WorkItemType workItemType, IEnumerable<WorkItemStateColor> states)> workItemStates)
         {
+            var workItemType = item.Fields["System.WorkItemType"].ToString();
+            var state = item.Fields["System.State"].ToString();
+
+            var states = workItemStates.Single(t => t.workItemType.Name == workItemType).states;
+            var stateCategory = states.SingleOrDefault(s => s.Name == state)?.Category ?? $"category not found for {state}";
+
             return new WorkItemRevisionInfo(
                 title: item.Fields["System.Title"].ToString(),
-                workItemType: item.Fields["System.WorkItemType"].ToString(),
+                workItemType: workItemType,
                 iterationPath: item.Fields["System.IterationPath"].ToString(),
-                state: item.Fields["System.State"].ToString(),
+                state: state,
+                stateCategory: stateCategory,
                 areaPath: item.Fields["System.AreaPath"].ToString(),
                 teamProject: item.Fields["System.TeamProject"].ToString(),
                 id: item.Id.Value,

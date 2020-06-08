@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi;
 using Microsoft.TeamFoundation.WorkItemTracking.WebApi.Models;
 using Microsoft.VisualStudio.Services.Common;
@@ -53,6 +54,25 @@ namespace WorkItemHistory
                     yield return item;
 
             } while (!revisions.IsLastBatch);
+        }
+
+        public async Task<IEnumerable<(WorkItemType workItemType, IEnumerable<WorkItemStateColor> workItemCategory)>> GetWorkItemTypeStates(string projectName)
+        {
+            return Evaluate(await GetWorkItemTypeStates());
+
+            async Task<IEnumerable<(WorkItemType workItemType, IEnumerable<WorkItemStateColor> workItemCategory)>> GetWorkItemTypeStates()
+            {
+                return (await _client.GetWorkItemTypesAsync(projectName))
+                   .Select(async t => (t, (await _client.GetWorkItemTypeStatesAsync(projectName, t.Name)).AsEnumerable()))
+                   .Select(x => x.Result);
+            }
+
+            static IEnumerable<(WorkItemType workItemType, IEnumerable<WorkItemStateColor> workItemCategory)> Evaluate(IEnumerable<(WorkItemType workItemType, IEnumerable<WorkItemStateColor> workItemCategory)> states)
+            {
+                return states
+                   .ToList()
+                   .Select(x => (x.workItemType, workItemCategory: x.workItemCategory.ToList().AsEnumerable()));
+            }
         }
     }
 }

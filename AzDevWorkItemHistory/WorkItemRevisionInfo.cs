@@ -9,6 +9,7 @@ namespace WorkItemHistory
         public string WorkItemType { get; }
         public string IterationPath { get; }
         public string State { get; }
+        public string StateCategory { get; }
         public string AreaPath { get; }
         public string TeamProject { get; }
         public int Id { get; }
@@ -16,12 +17,13 @@ namespace WorkItemHistory
         public DateTime ChangeDate { get; }
 
         public WorkItemRevisionInfo(string title, string workItemType, string iterationPath, string state,
-            string areaPath, string teamProject, int id, int revision, DateTime changeDate)
+            string stateCategory, string areaPath, string teamProject, int id, int revision, DateTime changeDate)
         {
             Title = title;
             WorkItemType = workItemType;
             IterationPath = iterationPath;
             State = state;
+            StateCategory = stateCategory;
             AreaPath = areaPath;
             TeamProject = teamProject;
             Id = id;
